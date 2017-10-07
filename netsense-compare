@@ -1,0 +1,58 @@
+import requests
+import json
+import sys
+from time import sleep
+import credentials
+
+servername = 'manufacturing.sensity.com'
+
+def ManufacturingResults(site_name):
+    # specify the url
+    session = requests.session()
+    headers = {'content-type': 'application/json', 'api_key': credentials.api_key_mfg }
+    base_url = 'https://' + servername + '/v3.0/customers/'
+    mfg_nodes = []
+    url = session.get(url=base_url, headers=headers )
+    mfgorgid = json.loads(url.text)[0]['orgid']
+    mfg_site_list = session.get(url=base_url + mfgorgid + '/sites' , headers=headers )
+    for i in json.loads(mfg_site_list.text):
+        if i['name'] == site_name:
+            siteid = i['siteid']
+
+    try:
+        siteid
+    except NameError:
+        print("Site not Found")
+        quit()
+    else:
+        mfg_node_list = session.get(url='https://' + servername + '/v3.0/customers/' + mfgorgid + '/sites/'
+                           + siteid + '/nodes')
+        for j in json.loads(mfg_node_list.text):
+            mfg_nodes.append(j['nodeid'])
+        return mfg_nodes
+
+def NetsenseResults():
+    session = requests.session()
+    headers = {'content-type': 'application/json', 'api_key': credentials.api_key_ns }
+    ns_nodes = []
+    ns_nodelist = session.get(url='https://netsense-us.sensity.com/v3.0/customers/' +
+                                  'efe5bdb3-baac-5d8e-6cae57771c13/sites/_nosite_/nodes', headers=headers)
+    for i in json.loads(ns_nodelist.text):
+        ns_nodes.append(i['nodeid'])
+    return ns_nodes
+
+print(sys.argv[1])
+mresults = ManufacturingResults(sys.argv[1])
+print('Downloading Results from ' + servername + ":")
+sleep(1)
+nresults = NetsenseResults()
+print('Comparing:')
+sleep(1)
+
+for i in mresults:
+    if i in nresults:
+        print(servername + ' : ' + i + ' : ' + 'Yes')
+    else:
+        print(servername + ' : ' + i + ' : ' +  'no')
+
+
