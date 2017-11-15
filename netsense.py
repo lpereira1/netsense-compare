@@ -12,7 +12,7 @@ def results():
     # specify the url
     session = requests.session()
     headers = {'content-type': 'application/json',
-               'api_key': api_key_mfg}
+               'api_key': credentials.api_key_mfg }
     print(servername.servername)
 
     url = session.get(url='https://' + servername.servername + '/v3.0/customers/', headers=headers , verify=False)
