@@ -41,8 +41,13 @@ def NetsenseResults():
         ns_nodes.append(i['nodeid'])
     return ns_nodes
 
-print(sys.argv[1])
-mresults = ManufacturingResults(sys.argv[1])
+
+
+try:
+    mresults = ManufacturingResults(sys.argv[1])
+except IndexError:
+    mresults = ManufacturingResults(input('site name?'))
+
 print('Downloading Results from ' + servername + ":")
 sleep(1)
 nresults = NetsenseResults()
