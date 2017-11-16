@@ -6,7 +6,7 @@ import requests
 import json
 
 server = 'ns-us-dcc.sensity.com'
-man-server='man-leg.sensity.com'
+manserver ='man-leg.sensity.com'
 
 def results():
     # specify the url
@@ -21,7 +21,7 @@ def results():
     mfgorgid = json.loads(url.text)[0]['orgid']
 
     sitelist = session.get(url='https://' + servername.servername + '/v3.0/customers/' + mfgorgid + '/sites' , headers=headers )
-
+    print(sitelist)
     responsedict = {}
 
     for i in json.loads(sitelist.text):
