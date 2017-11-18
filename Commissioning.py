@@ -18,14 +18,13 @@ def GetNodes():
                'api_key': credentials.api_key_mfg}
     print(servername.servername)
 
-    url = session.get(url='https://' + servername.servername + '/v3.0/customers/', headers=headers, verify=False)
+    url = session.get(url='https://' + servername.servername + '/v3.0/customers/', headers=headers)
 
     print(json.loads(url.text)[0]['name'])
     mfgorgid = json.loads(url.text)[0]['orgid']
 
     sitelist = session.get(url='https://' + servername.servername + '/v3.0/customers/' + mfgorgid + '/sites',
                            headers=headers)
-    print(sitelist)
     responsedict = {}
 
     for i in json.loads(sitelist.text):
@@ -37,10 +36,20 @@ def GetNodes():
 
         nodes = session.get(url='https://' + servername.servername + '/v3.0/customers/' + mfgorgid + '/sites/'
                                 + val + '/nodes')
-        url = 'https://' + servername.servername + '/v3.0/customers/' + mfgorgid + '/sites/' + val + '/nodes/redirect'
-        for i in json.loads(nodes.text):
-            nodedict.update({i['nodeid'] : [key , url]})
+        url = 'https://' + servername.servername + '/v3.0/customers/' + mfgorgid + '/sites/' + val
 
+        statusurl = session.get(url='https://' + servername.servername + '/v3.0/customers/' + mfgorgid +
+                                 '/sites/' + val + '/node_status')
+        for i in json.loads(statusurl.text):
+
+
+        for i in json.loads(nodes.text):
+            #nodestatus = session.get(url='https://' + servername.servername + '/v3.0/customers/' + mfgorgid +
+                                         #'/sites/' + val + '/nodes/' + i['nodeid'] + '/connection_status')
+
+            nodedict.update({i['nodeid']: [key, url, json.loads(nodestatus.text)['isconnected']]})
+
+        pprint.pprint(nodedict)
     return nodedict
 
 
@@ -58,7 +67,7 @@ def PushJsonToServer(node,nsserver,ns_url):
     payload["server"] = nsserver
     print(ns_url)
     print(payload)
-    pushpacket.post(ns_url, headers=headers, data=json.dumps(payload))
+    pushpacket.post(ns_url + '/nodes/redirect', headers=headers, data=json.dumps(payload))
 
 
 def NodeDeploy(filename):
@@ -74,9 +83,9 @@ def ReadFile(filename):
         item_list.extend(i[0] for i in csv.reader(f))
     return item_list
 
-#PushJsonToServer('N0123456','me.com', 'https://1.2.3.4/')
+GetNodes()
 
-NodeDeploy('test2.csv')
+#NodeDeploy('test.csv')
 
-#print(ReadFile('test2.csv'))
+
 
